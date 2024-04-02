@@ -5,17 +5,18 @@ import Loader from '../../components/loader/loader';
 
 import axios from "../../axios"
 
-import {useNavigate,useParams} from "react-router-dom"
+import { useParams } from "react-router-dom"
+import { Form, Button, Col, Row, Container } from 'react-bootstrap';
 
 const AddProductForm = () => {
 
 
-    const {id} = useParams();
-    const [name, setname] = useState();
-    const [price, setprice] = useState();
-    const [category, setcategory] = useState();
-    const [description, setdescription] = useState();
-    const [stock, setstock] = useState();
+    const { userId } = useParams();
+    const [name, setName] = useState();
+    const [price, setPrice] = useState();
+    const [category, setCategory] = useState();
+    const [description, setDescription] = useState();
+    const [stock, setStock] = useState();
     const [prodImage, setprodImage] = useState(null);
 
 
@@ -36,6 +37,28 @@ const AddProductForm = () => {
         }
         : {};
 
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        switch (name) {
+            case 'name':
+                setName(value);
+                break;
+            case 'price':
+                setPrice(value);
+                break;
+            case 'category':
+                setCategory(value);
+                break;
+            case 'description':
+                setDescription(value);
+                break;
+            case 'stock':
+                setStock(value);
+                break;
+            default:
+                break;
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -46,99 +69,135 @@ const AddProductForm = () => {
         formData.append('description', description);
         formData.append('stock', stock);
         formData.append('prodImage', prodImage);
-        formData.append('supplier', id);
-        try{
-            setLoading(true);
-            const response = await axios.post(`/product/add-product/${id}`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+        formData.append('supplier', userId);
+
+        setLoading(true);
+        axios.post('/product/add-product', formData, { responseType: 'arraybuffer' })
+            .then(response => {
+                setLoading(false);
+                setIsPopUpOpen(true);
+                setpopUpText("Product Added Successfully");
+                setName('');
+                setPrice('');
+                setCategory('');
+                setDescription('');
+                setStock('');
+                setprodImage('');
+                const blob = new Blob([response.data], { type: 'application/pdf' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'product_qrs.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
             })
-            console.log(response);
-            setLoading(false);
-            setIsPopUpOpen(true);
-            setpopUpText("Product Added Successfully");
-        }catch(error){
-            console.log(error);
-            setLoading(false);
-            if(error?.response?.data?.message){
-                setpopUpText(error?.response?.data?.message);
-            }
-            else{
-                setpopUpText("Something Went Wrong")
-            }
-            setIsPopUpOpen(true);
-        }
+            .catch(error => {
+                console.log(error);
+                setLoading(false);
+                if (error?.response?.data?.message) {
+                    setpopUpText(error?.response?.data?.message);
+                }
+                else {
+                    setpopUpText("Something Went Wrong")
+                }
+                setIsPopUpOpen(true);
+            });
     };
 
     return (
-        <form className="add-product-form" onSubmit={handleSubmit}>
+        <>
             {isBackgroundBlurred && <div style={blurredBackgroundStyles} />}
             {loading && <Loader />}
-        <div className="form-group">
-            <label>Name:</label>
-            <input
-            type="text"
-            name="name"
-            value={name}
-            onChange={(e) => setname(e.target.value)}
-            required
-            />
-        </div>
-        <div className="form-group">
-            <label>Price:</label>
-            <input
-            type="number"
-            name="price"
-            value={price}
-            onChange={(e) => setprice(e.target.value)}
-            required
-            />
-        </div>
-        <div className="form-group">
-            <label>Category:</label>
-            <input
-            type="text"
-            name="category"
-            value={category}
-            onChange={(e) => setcategory(e.target.value)}
-            required
-            />
-        </div>
-        <div className="form-group">
-            <label>Description:</label>
-            <textarea
-            name="description"
-            value={description}
-            onChange={(e) => setdescription(e.target.value)}
-            required
-            ></textarea>
-        </div>
-        <div className="form-group">
-            <label>Stock:</label>
-            <input
-            type="number"
-            name="stock"
-            value={stock}
-            onChange={(e) => setstock(e.target.value)}
-            required
-            />
-        </div>
-        <div className="form-group">
-            <label>Image URL:</label>
-            <input
-            type="file"
-            name="imageUrl"
-            onChange={(e) => setprodImage(e.target.files[0])}
-            />
-        </div>
-        <button type="submit" className="submit-btn">Add Product</button>
-        <PopUp
+            <Container>
+                <Row>
+                    <Col md={6}>
+                        <Form onSubmit={handleSubmit}>
+                            <Row className="mb-3">
+                                <Form.Group as={Col} controlId="name">
+                                    <Form.Label>Name:</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Enter name"
+                                        name="name"
+                                        value={name}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+
+                                <Form.Group as={Col} controlId="category">
+                                    <Form.Label>Category:</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Enter category"
+                                        name="category"
+                                        value={category}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Row>
+
+                            <Row className="mb-3">
+                                <Form.Group controlId="price">
+                                    <Form.Label>Price:</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        placeholder="Enter price"
+                                        name="price"
+                                        value={price}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+
+                                <Form.Group controlId="stock">
+                                    <Form.Label>Stock:</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        placeholder="Enter stock"
+                                        name="stock"
+                                        value={stock}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Row>
+
+                            <Form.Group className="mb-3" controlId="description">
+                                <Form.Label>Description:</Form.Label>
+                                <Form.Control
+                                    as="textarea"
+                                    rows={3}
+                                    placeholder="Enter description"
+                                    name="description"
+                                    value={description}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group className="mb-3" controlId="imageUrl">
+                                <Form.Label>Image URL:</Form.Label>
+                                <Form.Control
+                                    type="file"
+                                    onChange={(e) => setprodImage(e.target.files[0])}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Button type="submit" className="submit-btn">Add Product</Button>
+                        </Form>
+                    </Col>
+                </Row>
+            </Container>
+            <PopUp
                 isOpen={isPopUpOpen}
                 close={() => setIsPopUpOpen(false)}
                 text={popUpText}
             />
-        </form>
+        </>
     );
 };
 
