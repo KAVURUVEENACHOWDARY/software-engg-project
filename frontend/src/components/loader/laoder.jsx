@@ -7,4 +7,4 @@ export default function Loader() {
             <div className="loading-page_loading-container"></div>
         </div>
     )
-}
+} 
