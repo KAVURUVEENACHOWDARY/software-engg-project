@@ -3,7 +3,8 @@ const router = express.Router();
 
 const CustomerModel = require('../models/customer');
 const AdminModel = require('../models/admin');
-const ProductModel = require('../models/product');
+const ProductModel = require('../models/products');
+const SupplierModel = require('../models/supplier');
 
 router.post('/customer-login', async(req, res) => {
     try{
@@ -42,6 +43,7 @@ router.post('/admin-login', async(req, res) => {
         res.json({message:"error"});
     }
 })
+
 
 router.post("customer-register", async(req, res) => {
     try{
@@ -127,6 +129,8 @@ router.post("/supplier-login", async(req, res) => {
         res.json({message:"error"});
     }
 })
+
+
 
 
 

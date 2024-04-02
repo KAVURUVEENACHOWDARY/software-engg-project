@@ -11,7 +11,7 @@ const orderSchema = new mongoose.Schema({
     txnId: String,
     items: [
         {   
-            product: {type: Schema.Types.ObjectId, ref: 'product', required: true} ,
+            product: {type: mongoose.Schema.Types.ObjectId, ref: 'product', required: true} ,
             unit: { type: Number, require: true} 
         }
     ]

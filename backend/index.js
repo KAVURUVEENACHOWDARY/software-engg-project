@@ -4,7 +4,7 @@ const cors=require("cors");
 app.use(cors());
 
 const dotenv = require("dotenv");
-dotenv.config({ path: __dirname+'.env' });
+dotenv.config({ path: __dirname+'/.env' });
 
 
 const mongoose = require("mongoose");
@@ -23,7 +23,7 @@ db.once("open",()=>console.log("connected to database"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const authApi = require("./api/authAPI");
+const authApi = require("./api/authApi");
 const productApi = require("./api/productAPI");
 
 app.use("/auth",authApi );
