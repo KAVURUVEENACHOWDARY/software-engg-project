@@ -97,4 +97,15 @@ router.get("/get-products", async (req, res) => {
     }
 })
 
+router.get("/get-products/:supplierId", async (req, res) => {
+    try {
+        const supplierId = req.params.supplierId;
+        const products = await ProductModel.find({supplier:new mongoose.Types.ObjectId(supplierId)}).select({productId:1, _id:0, description:1, stock:1, price:1, imageUrl:1, name:1, category:1});
+        res.status(200).json(products);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Something Went Wrong... ;)" });
+    }
+});
+
 module.exports = router;
