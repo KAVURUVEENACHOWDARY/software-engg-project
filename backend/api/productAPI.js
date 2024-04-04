@@ -8,11 +8,13 @@ const {prodUpload} = require("../multer");
 const s3 = require("../s3");
 
 
-router.post("/add-product/:id",prodUpload, async (req, res) => {
+router.post("/add-product", prodUpload, async (req, res) => {
     try {
         const response = await s3.uploadFile(process.env.AWS_BUCKET_NAME,req.files.prodImage[0]) ; 
         const {name,price,description,category,supplier,stock} = req.body;
+        const newId = Math.floor(1000000000000000 + Math.random() * 9000000000000000);
         const product = new ProductModel({
+            productId : newId,
             name,
             price,
             description,
@@ -21,13 +23,70 @@ router.post("/add-product/:id",prodUpload, async (req, res) => {
             stock,
             imageUrl:response.Location
         });
+        const qrCodes = [], products = [];
+        for(let i = 0; i< stock; i++){
+            const newProduct = {
+                randomNumber : Math.floor(1000000000000000 + Math.random() * 9000000000000000),
+                customerId: null,
+                claimed: false
+            }
+            products.push(newProduct);
+            const qrCode = QRCode.imageSync(`http://192.168.1.7:3000/${newId}/${newProduct.randomNumber}`, { type: 'png' });
+            qrCodes.push(qrCode);
+        }
+        product.products = products;
         await product.save();
-        res.status(200).json({ message: "product added" });
+
+        const doc = new PDFDocument();
+        const pdfFileName = `product_qrs.pdf`;
+        doc.pipe(fs.createWriteStream(pdfFileName));
+
+        const qrCodesCount = qrCodes.length;
+        const columns = Math.min(maxColumns, qrCodesCount);
+        let currentPage = 1;
+        let currentColumn = 0;
+        let currentRow = 0;
+
+        const maxRowsPerPage = Math.floor((pageHeight - 2 * marginY + rowSpacing) / (qrHeight + rowSpacing));
+
+        qrCodes.forEach((qrCode, index) => {
+            const x = marginX + currentColumn * pageMarginX;
+            const y = marginY + currentRow * pageMarginY;
+        
+            if (currentRow >= maxRowsPerPage) {
+                doc.addPage();
+                currentPage++;
+                currentColumn = 0;
+                currentRow = 0;
+            }
+        
+            doc.image(qrCode, x, y, { width: qrWidth, height: qrHeight });
+            doc.moveDown();
+        
+            currentColumn++;
+            if (currentColumn >= columns) {
+                currentColumn = 0;
+                currentRow++;
+            }
+        });        
+
+        const buffers = [];
+        doc.on('data', buffers.push.bind(buffers));
+        doc.on('end', () => {
+            const pdfData = Buffer.concat(buffers);
+            res.writeHead(200, {
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': 'attachment; filename=product_qrs.pdf',
+                'Content-Length': pdfData.length
+            });
+            res.end(pdfData);
+        });
+        doc.end();
     } catch (err) {
         console.log(err);
-        res.json({ message: "error" });
+        res.status(500).json({ message: "Something Went Wrong... ;)" });
     }
-})
+});
 
 router.get("/get-products", async (req, res) => {
     try {
@@ -38,19 +97,4 @@ router.get("/get-products", async (req, res) => {
     }
 })
 
-<<<<<<< HEAD
-router.post("/search-products", async (req, res) => {
-    try {
-        const {search} = req.body;
-        const products = await ProductModel.find({$regex:search,$options:"i"});
-        res.status(200).json(products);
-    } catch (err) {
-        res.json({ message: "error" });
-    }
-})
-
-
-
-=======
->>>>>>> 00fbdf55dd89108504a980359e0d4f2b0c38683e
 module.exports = router;
