@@ -38,4 +38,19 @@ router.get("/get-products", async (req, res) => {
     }
 })
 
+<<<<<<< HEAD
+router.post("/search-products", async (req, res) => {
+    try {
+        const {search} = req.body;
+        const products = await ProductModel.find({$regex:search,$options:"i"});
+        res.status(200).json(products);
+    } catch (err) {
+        res.json({ message: "error" });
+    }
+})
+
+
+
+=======
+>>>>>>> 00fbdf55dd89108504a980359e0d4f2b0c38683e
 module.exports = router;
