@@ -108,4 +108,29 @@ router.get("/get-products/:supplierId", async (req, res) => {
     }
 });
 
+router.post("/buy-product/:customerId", prodUpload, async(req, res) => {
+    try{
+        const productsToBuy = req.body.products;
+        const customerId = req.params.customerId;
+        for(let i = 0; i < productsToBuy.length; i++){
+            const productId = productsToBuy[i].productId;
+            const quantity = productsToBuy[i].quantity;
+            const product = await ProductModel.findOne({productId:productId});
+            if(!product){
+                continue;
+            }
+            for(let j = 0; j < quantity; j++){
+                product.stock -= 1;
+                const p = product.products.find((p) => p.customerId === null);
+                p.customerId = customerId;
+                p.purchaseDate = new Date().toUTCString();
+            }
+            product.save();
+        }
+        res.status(200).json({message:"successfull"});
+    }catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Something Went Wrong... ;)" });
+    }
+});
 module.exports = router;
