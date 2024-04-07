@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
+    productId:{
+        type: Number,
+        required:true
+    },
     name: {
         type: String,
         required: true,
@@ -33,7 +37,26 @@ const productSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'supplier',
         required: true,
-    }
+    },
+    products:[
+        {
+            randomNumber: {
+                type: String,
+                required: true,
+            },
+            customerId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'customer'
+            },
+            claimed: {
+                type: Boolean,
+                required: true
+            },
+            purchaseDate:{
+                type: Date,
+            }
+        }
+    ]
 }, {timestamps: true})
 
 module.exports = mongoose.model('Product', productSchema);
