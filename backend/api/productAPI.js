@@ -149,4 +149,5 @@ router.get("/claim-product/:customerId/:productId/:randomNumber", async(req, res
         res.status(500).json({ message: "Something Went Wrong... ;)" });
     }
 });
+
 module.exports = router;
