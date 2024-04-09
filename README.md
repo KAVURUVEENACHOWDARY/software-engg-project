@@ -7,3 +7,5 @@ We can use Windows/macOS OS platforms. Hardware for windows: Processor-Intel Cor
 Software Environment:
 
 Framework: Programming Language: Backend and Database: Development Tool: Visual Studio Code Package Management: Version Control: Git and github
+
+SOFTWARE VISION :  FOR Online Shoppers WHO are seeking to discover and shop Products by saving money and also to know the product quality THE "Savings Sphere" is a web based e-commerce application THAT Allows customer to Change the language according to their choice and to know whether the product is authentic or not , it will also have the Paperless warranty upon the purchase and also it sends the notifications regarding the expiry of the product which helps them think about buying the product UNLIKE other applications such as temu and Nykaa, OUR PRODUCT provides all the smart features in one single application so that Customers can save money by choosing their product.
