@@ -1,0 +1,51 @@
+@import url("../../colors.css");
+
+.dashboard-container {
+  background-color: var(--background-color);
+}
+
+.dashboard-container .navbar {
+  background-color: var(--primary-color);
+  display: flex;
+  align-items: center;
+}
+
+.dashboard-container .nav-brand {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--white-color);
+}
+
+.dashboard-container .nav-text {
+  font-size: large;
+  font-weight: 500;
+  color: var(--white-color);
+}
+
+.dashboard-container .nav-item {
+  margin: 0 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: font-weight 0.1s;
+  color: var(--white-color);
+}
+
+.dashboard-container .nav-item:hover {
+  font-weight: 700;
+}
+
+.content-area {
+  background-image: url('../../images/mayur-deshpande-zZPeoLxLRyM-unsplash.jpg');
+  flex-grow: 1;
+  padding: 2rem;
+  background: #f8f9fa;
+}
+
+.cart {
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+  padding-left: 2rem;
+}
