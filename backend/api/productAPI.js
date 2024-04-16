@@ -167,5 +167,24 @@ router.get("/warranty-product/:customerId/:productId/:randomNumber", async(req, 
     }
 });
 
+router.get("/expiry-product/:customerId/:productId/:randomNumber", async(req, res) => {
+    try{
+        const customerId = req.params.customerId;
+        const productId = req.params.productId;
+        const randomNumber = req.params.randomNumber;
+
+        const product = await ProductModel.find({productId:productId});
+        product[0].products.find((p) => p.randomNumber === randomNumber && p.customerId === customerId).claimed = true;
+
+        res.status(200).send({message: "successfull"});
+    }catch(err){
+        console.log(err);
+        res.status(500).json({ message: "Something Went Wrong... ;)" });
+    }
+});
+
+
+
+
 
 module.exports = router;
