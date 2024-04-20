@@ -129,10 +129,21 @@ router.post("/buy-product/:customerId", prodUpload, async(req, res) => {
                 continue;
             }
             for(let j = 0; j < quantity; j++){
+                const purchaseDate = new Date().toUTCString();
                 product.stock -= 1;
                 const p = product.products.find((p) => p.customerId === null);
                 p.customerId = customerId;
-                p.purchaseDate = new Date().toUTCString();
+                p.purchaseDate = purchaseDate;
+                if(product.expiry !== null){
+                    let purchaseDateObj = new Date(purchaseDate);
+                    purchaseDateObj.setDate(purchaseDateObj.getDate() + product.expiry).toUTCString();;
+                    p.expiryDate = purchaseDateObj;
+                }
+                if(product.warranty !== null){
+                    let purchaseDateObj = new Date(purchaseDate);
+                    purchaseDateObj.setDate(purchaseDateObj.getDate() + product.warranty).toUTCString();;
+                    p.warrantyDate = purchaseDateObj;
+                }
             }
             product.save();
         }
@@ -142,7 +153,6 @@ router.post("/buy-product/:customerId", prodUpload, async(req, res) => {
         res.status(500).json({ message: "Something Went Wrong... ;)" });
     }
 });
-
 router.get("/claim-product/:customerId/:productId/:randomNumber", async(req, res) => {
     try{
         const customerId = req.params.customerId;
