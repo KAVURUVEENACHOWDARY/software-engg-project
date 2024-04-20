@@ -10,8 +10,16 @@ const s3 = require("../s3");
 
 router.post("/add-product", prodUpload, async (req, res) => {
     try {
-        const response = await s3.uploadFile(process.env.AWS_BUCKET_NAME,req.files.prodImage[0]) ; 
-        const {name,price,description,category,supplier,stock} = req.body;
+        const response = await s3.uploadFile(process.env.AWS_BUCKET_NAME,req.files.prodImage[0]); 
+        const { name,
+                price,
+                description,
+                category,
+                supplier,
+                stock,
+                expiry,
+                warranty
+            } = req.body;
         const newId = Math.floor(1000000000000000 + Math.random() * 9000000000000000);
         const product = new ProductModel({
             productId : newId,
@@ -21,6 +29,8 @@ router.post("/add-product", prodUpload, async (req, res) => {
             category,
             supplier,
             stock,
+            expiry,
+            warranty,
             imageUrl:response.Location
         });
         const qrCodes = [], products = [];
@@ -87,7 +97,6 @@ router.post("/add-product", prodUpload, async (req, res) => {
         res.status(500).json({ message: "Something Went Wrong... ;)" });
     }
 });
-
 router.get("/get-products", async (req, res) => {
     try {
         const products = await ProductModel.find();
