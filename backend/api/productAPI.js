@@ -169,6 +169,36 @@ router.get("/claim-product/:customerId/:productId/:randomNumber", async(req, res
     }
 });
 
+router.post("/verify-product/:productId/:randomNumber", async(req, res) => {
+    try{
+        const customerId = req.body.customerId;
+        const productId = req.params.productId;
+        const randomNumber = req.params.randomNumber;
+
+        const product = await ProductModel.find({productId:productId});
+        if(product.length === 0){
+            return res.status(404).json({message : "Product not found"});
+        }
+        const productClaimed = product[0].products.find((p) => p.randomNumber === randomNumber);
+        const claimedCustomer = productClaimed.customerId;
+
+        const {name, price, category, description, imageUrl} = product[0];
+
+        if(claimedCustomer === null){
+            return res.status(200).send({message: "Authentic", name, price, category, description, imageUrl});
+        }
+        if(claimedCustomer.toString() === customerId){
+            const { purchaseDate } = productClaimed;
+            return res.status(200).send({message: "owned", name, price, category, description, imageUrl, purchaseDate});
+        }
+
+        return res.status(200).send({message: "fake", name, price, category, description, imageUrl});
+    }catch(err){
+        console.log(err);
+        res.status(500).json({ message: "Something Went Wrong... ;)" });
+    }
+});
+
 
 router.get("/warranty-product/:customerId/:productId/:randomNumber", async(req, res) => {
     try{
@@ -201,6 +231,8 @@ router.get("/expiry-product/:customerId/:productId/:randomNumber", async(req, re
         res.status(500).json({ message: "Something Went Wrong... ;)" });
     }
 });
+
+
 
 
 
