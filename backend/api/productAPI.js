@@ -147,10 +147,26 @@ router.post("/buy-product/:customerId", prodUpload, async(req, res) => {
             }
             product.save();
         }
-        res.status(200).json({message:"successfull"});
+
+        let coupon = null;
+        for(let i = 0; i < 3; i++){
+            const randomProductIndex = Math.floor(Math.random() * productsToBuy.length);
+            const randomProduct = productsToBuy[randomProductIndex];
+            const product = await ProductModel.findOne({productId:randomProduct.productId});
+
+            coupon = await Coupon.findOne({supplierId:product.supplier, customerId:null});
+            if(coupon){
+                break;
+            }
+        }
+        if(coupon){
+            coupon.customerId = customerId;
+            await coupon.save();
+        }
+        res.status(200).json({message:"successfull", couponReceived: coupon?true:false});
     }catch (err) {
         console.log(err);
-        res.status(500).json({ message: "Something Went Wrong... ;)" });
+        res.status(500).json({ message: "Something Went Wrong...)" });
     }
 });
 router.get("/claim-product/:customerId/:productId/:randomNumber", async(req, res) => {
