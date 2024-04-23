@@ -31,3 +31,31 @@ cron.schedule('*/10 * * * *', async () => {
     console.error('Error processing products:', error);
   }
 });
+
+// 2) Cron job to send warranty alerts (runs every 10 minutes)
+cron.schedule('*/10 * * * *', async () => {
+  const currentDate = new Date().toUTCString();
+  try {
+    const products = await Product.find({});
+    for (const product of products) {
+      if (product.expiry !== null) {
+        for (const p of product.products) {
+          if (p.customerId !== null && p.expiryDate !== null && !p.warrantyNotification) {
+            if (new Date(p.expiryDate) < new Date(currentDate)) {
+              const customer = await Customer.findById(p.customerId);
+              sendEmail(
+                customer.name, 
+                customer.email, 
+                'Warranty Alert', 
+                `Your product warranty for ${product.name} purchased on ${p.purchaseDate.toLocaleDateString()} has expired on ${p.warrantyDate.toLocaleDateString()}.`);
+                p.warrantyNotification = true;
+            }
+          }
+        }
+      }
+      await product.save();
+    }
+  } catch (error) {
+    console.error('Error processing products:', error);
+  }
+});
