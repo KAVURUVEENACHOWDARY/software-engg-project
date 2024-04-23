@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import './dashboard.css';
 import { useParams, useNavigate } from 'react-router-dom';
 import AddProduct from '../addProduct/addProduct';
+import AddCoupons from '../addCoupons/addCoupons';
 import ViewProducts from '../viewProduct/viewProduct';
+import ViewCoupons from '../View Coupons Supplier/viewCoupons';
 import { Container, Navbar, Nav } from 'react-bootstrap';
 import { Badge } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -60,9 +62,12 @@ const Dashboard = () => {
                         {userType === "supplier" && <Nav className="me-auto">
                             <Nav.Item className='nav-item' onClick={() => setCurrentView('addProduct')}>Add Product</Nav.Item>
                             <Nav.Item className='nav-item' onClick={() => setCurrentView('viewProducts')}>View Products</Nav.Item>
+                            <Nav.Item className='nav-item' onClick={() => setCurrentView('addCoupons')}>Add Coupons</Nav.Item>
+                            <Nav.Item className='nav-item' onClick={() => setCurrentView('viewCoupons')}>View Coupons</Nav.Item>
                         </Nav>}
                         {userType === "customer" && <Nav className="me-auto">
                             <Nav.Item className='nav-item' onClick={() => navigate(`/scan/${userId}/${userName}/${userType}`)}>Verify Product</Nav.Item>
+                            <Nav.Item className='nav-item' onClick={() => navigate(`/view-coupons/${userId}/${userName}/${userType}`)}>View Rewards</Nav.Item>
                         </Nav>}
                         <Navbar.Text className='nav-text'>
                             Signed in as: {userName}
@@ -83,15 +88,16 @@ const Dashboard = () => {
             {
                 userType === "supplier" && <>
                     <div className="content-area">
-                        {currentView === 'addProduct' ? (
-                            <div>
-                                <AddProduct />
-                            </div>
-                        ) : (
-                            <div>
-                                <ViewProducts userType={userType} userId={userId} setCartNumber={setCartNumber} cart={cart} setCart={setCart} />
-                            </div>
-                        )}
+                        { currentView === 'addProduct' && <AddProduct /> }
+                        { currentView === 'viewProducts' &&  
+                            <ViewProducts 
+                                userType={userType} 
+                                userId={userId} 
+                                setCartNumber={setCartNumber} 
+                                cart={cart} 
+                                setCart={setCart} />}
+                        { currentView === 'addCoupons' && <AddCoupons /> }
+                        { currentView === 'viewCoupons' && <ViewCoupons /> }
                     </div>
                 </>
             }
