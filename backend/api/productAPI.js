@@ -1,12 +1,25 @@
 const express = require('express');
 const router = express.Router();
-
+const PDFDocument = require('pdfkit');
+const QRCode = require('qr-image');
 const ProductModel = require('../models/products');
-
-const {prodUpload} = require("../multer");
-
+const Coupon = require('../models/coupon');
+const { prodUpload } = require("../multer");
+const fs = require('fs');
 const s3 = require("../s3");
+const { default: mongoose } = require('mongoose');
 
+const pageWidth = 612;
+const pageHeight = 792;
+const qrWidth = 100;
+const qrHeight = 100;
+const marginX = 50;
+const marginY = 50;
+const columnSpacing = 50;
+const rowSpacing = 50;
+const maxColumns = Math.floor((pageWidth - 2 * marginX + columnSpacing) / (qrWidth + columnSpacing));
+const pageMarginX = marginX + qrWidth + columnSpacing;
+const pageMarginY = marginY + qrHeight + rowSpacing;
 
 router.post("/add-product", prodUpload, async (req, res) => {
     try {
@@ -97,14 +110,15 @@ router.post("/add-product", prodUpload, async (req, res) => {
         res.status(500).json({ message: "Something Went Wrong... ;)" });
     }
 });
+
 router.get("/get-products", async (req, res) => {
     try {
-        const products = await ProductModel.find();
+        const products = await ProductModel.find().select({productId:1, _id:0, description:1, stock:1, price:1, imageUrl:1, name:1, category:1});
         res.status(200).json(products);
     } catch (err) {
-        res.json({ message: "error" });
+        res.status(500).json({ message: "Something Went Wrong... ;)" });
     }
-})
+});
 
 router.get("/get-products/:supplierId", async (req, res) => {
     try {
@@ -121,31 +135,41 @@ router.post("/buy-product/:customerId", prodUpload, async(req, res) => {
     try{
         const productsToBuy = req.body.products;
         const customerId = req.params.customerId;
-        for(let i = 0; i < productsToBuy.length; i++){
-            const productId = productsToBuy[i].productId;
-            const quantity = productsToBuy[i].quantity;
-            const product = await ProductModel.findOne({productId:productId});
-            if(!product){
-                continue;
-            }
-            for(let j = 0; j < quantity; j++){
-                const purchaseDate = new Date().toUTCString();
+
+        const productQuantityMap = productsToBuy.reduce((map, product) => {
+            map[product.productId] = (map[product.productId] || 0) + product.quantity;
+            return map;
+        }, {});
+
+        const productIds = Object.keys(productQuantityMap);
+        const products = await ProductModel.find({ productId: { $in: productIds } });
+
+        for (let product of products) {
+            const quantity = productQuantityMap[product.productId];
+            const purchaseDate = new Date().toUTCString();
+
+            for (let i = 0; i < quantity; i++) {
                 product.stock -= 1;
                 const p = product.products.find((p) => p.customerId === null);
-                p.customerId = customerId;
-                p.purchaseDate = purchaseDate;
-                if(product.expiry !== null){
-                    let purchaseDateObj = new Date(purchaseDate);
-                    purchaseDateObj.setDate(purchaseDateObj.getDate() + product.expiry).toUTCString();;
-                    p.expiryDate = purchaseDateObj;
-                }
-                if(product.warranty !== null){
-                    let purchaseDateObj = new Date(purchaseDate);
-                    purchaseDateObj.setDate(purchaseDateObj.getDate() + product.warranty).toUTCString();;
-                    p.warrantyDate = purchaseDateObj;
+                if (p) {
+                    p.customerId = customerId;
+                    p.purchaseDate = purchaseDate;
+
+                    if (product.expiry !== null) {
+                        let purchaseDateObj = new Date(purchaseDate);
+                        purchaseDateObj.setDate(purchaseDateObj.getDate() + product.expiry);
+                        p.expiryDate = purchaseDateObj.toUTCString();
+                    }
+
+                    if (product.warranty !== null) {
+                        let purchaseDateObj = new Date(purchaseDate);
+                        purchaseDateObj.setDate(purchaseDateObj.getDate() + product.warranty);
+                        p.warrantyDate = purchaseDateObj.toUTCString();
+                    }
                 }
             }
-            product.save();
+
+            await product.save();
         }
 
         let coupon = null;
@@ -169,6 +193,7 @@ router.post("/buy-product/:customerId", prodUpload, async(req, res) => {
         res.status(500).json({ message: "Something Went Wrong...)" });
     }
 });
+
 router.get("/claim-product/:customerId/:productId/:randomNumber", async(req, res) => {
     try{
         const customerId = req.params.customerId;
@@ -177,6 +202,7 @@ router.get("/claim-product/:customerId/:productId/:randomNumber", async(req, res
 
         const product = await ProductModel.find({productId:productId});
         product[0].products.find((p) => p.randomNumber === randomNumber && p.customerId === customerId).claimed = true;
+        await product[0].save();
 
         res.status(200).send({message: "successfull"});
     }catch(err){
@@ -214,44 +240,5 @@ router.post("/verify-product/:productId/:randomNumber", async(req, res) => {
         res.status(500).json({ message: "Something Went Wrong... ;)" });
     }
 });
-
-
-router.get("/warranty-product/:customerId/:productId/:randomNumber", async(req, res) => {
-    try{
-        const customerId = req.params.customerId;
-        const productId = req.params.productId;
-        const randomNumber = req.params.randomNumber;
-
-        const product = await ProductModel.find({productId:productId});
-        product[0].products.find((p) => p.randomNumber === randomNumber && p.customerId === customerId).claimed = true;
-
-        res.status(200).send({message: "successfull"});
-    }catch(err){
-        console.log(err);
-        res.status(500).json({ message: "Something Went Wrong... ;)" });
-    }
-});
-
-router.get("/expiry-product/:customerId/:productId/:randomNumber", async(req, res) => {
-    try{
-        const customerId = req.params.customerId;
-        const productId = req.params.productId;
-        const randomNumber = req.params.randomNumber;
-
-        const product = await ProductModel.find({productId:productId});
-        product[0].products.find((p) => p.randomNumber === randomNumber && p.customerId === customerId).claimed = true;
-
-        res.status(200).send({message: "successfull"});
-    }catch(err){
-        console.log(err);
-        res.status(500).json({ message: "Something Went Wrong... ;)" });
-    }
-});
-
-
-
-
-
-
 
 module.exports = router;

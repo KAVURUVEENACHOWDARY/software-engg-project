@@ -18,7 +18,8 @@ const AddProductForm = () => {
     const [description, setDescription] = useState();
     const [stock, setStock] = useState();
     const [prodImage, setprodImage] = useState(null);
-
+    const [expiry, setExpiry] = useState(null);
+    const [warranty, setWarranty] = useState(null);
 
     const [isPopUpOpen, setIsPopUpOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -40,6 +41,12 @@ const AddProductForm = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         switch (name) {
+            case 'expiry':
+                setExpiry(value);
+                break;
+            case 'warranty':
+                setWarranty(value);
+                break;
             case 'name':
                 setName(value);
                 break;
@@ -66,6 +73,8 @@ const AddProductForm = () => {
         formData.append('name', name);
         formData.append('price', price);
         formData.append('category', category);
+        formData.append('expiry', expiry);
+        formData.append('warranty', warranty);
         formData.append('description', description);
         formData.append('stock', stock);
         formData.append('prodImage', prodImage);
@@ -83,6 +92,8 @@ const AddProductForm = () => {
                 setDescription('');
                 setStock('');
                 setprodImage('');
+                setWarranty(null);
+                setExpiry(null);
                 const blob = new Blob([response.data], { type: 'application/pdf' });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -111,7 +122,7 @@ const AddProductForm = () => {
             {loading && <Loader />}
             <Container>
                 <Row>
-                    <Col md={6}>
+                    <Col>
                         <Form onSubmit={handleSubmit}>
                             <Row className="mb-3">
                                 <Form.Group as={Col} controlId="name">
@@ -165,6 +176,32 @@ const AddProductForm = () => {
                                 </Form.Group>
                             </Row>
 
+                            <Row className="mb-3">
+                                <Form.Group controlId="expiry">
+                                    <Form.Label>Expiry Period(in days):</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        placeholder="Enter expiry(in days)"
+                                        name="expiry"
+                                        value={expiry}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+
+                                <Form.Group controlId="stock">
+                                    <Form.Label>Warranty Period(in days):</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        placeholder="Enter warranty(in days)"
+                                        name="warranty"
+                                        value={warranty}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Row>
+
                             <Form.Group className="mb-3" controlId="description">
                                 <Form.Label>Description:</Form.Label>
                                 <Form.Control
@@ -199,6 +236,6 @@ const AddProductForm = () => {
             />
         </>
     );
-}; 
+};
 
 export default AddProductForm;

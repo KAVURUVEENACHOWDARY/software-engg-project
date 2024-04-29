@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import './signup.css'; 
+import './signup.css';
 import PopUp from "../../components/popup/popup";
 import Loader from '../../components/loader/loader';
 
 import axios from "../../axios"
 
-import {useNavigate} from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 
 const Register = () => {
   const navigate = useNavigate();
@@ -15,22 +15,23 @@ const Register = () => {
     password: '',
   });
 
+  const location = useLocation();
   const [isPopUpOpen, setIsPopUpOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [popUpText, setpopUpText] = useState("")
-    const [isBackgroundBlurred, setIsBackgroundBlurred] = useState(false);
-    const blurredBackgroundStyles = isBackgroundBlurred
-        ? {
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(100, 100, 100, 0.5)",
-            backdropFilter: "blur(1.8px)",
-            zIndex: 1,
-        }
-        : {};
+  const [loading, setLoading] = useState(false);
+  const [popUpText, setpopUpText] = useState("")
+  const [isBackgroundBlurred, setIsBackgroundBlurred] = useState(false);
+  const blurredBackgroundStyles = isBackgroundBlurred
+    ? {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      backgroundColor: "rgba(100, 100, 100, 0.5)",
+      backdropFilter: "blur(1.8px)",
+      zIndex: 1,
+    }
+    : {};
 
   const handleChange = async (e) => {
     const { name, value } = e.target;
@@ -43,21 +44,27 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    try{
-      const response = await axios.post("/auth/supplier-register", {
-        email:userDetails.email,
-        password:userDetails.password,
-        name:userDetails.name
-      })
+    try {
+      let userType = "customer"
+      if (location.pathname.includes("/supplier")) {
+        userType = "supplier"
+      }
+      const response = await axios.post(`/auth/${userType}-register`, {
+        email: userDetails.email,
+        password: userDetails.password,
+        name: userDetails.name
+      });
+      setpopUpText("Successfully Registered!!!");
+      setIsPopUpOpen(true);
       navigate("/");
-    }catch(error){
+    } catch (error) {
       console.log(error);
       setLoading(false);
-      if(error?.response?.data?.message){
-          setpopUpText(error?.response?.data?.message);
+      if (error?.response?.data?.message) {
+        setpopUpText(error?.response?.data?.message);
       }
-      else{
-          setpopUpText("Something Went Wrong")
+      else {
+        setpopUpText("Something Went Wrong")
       }
       setIsPopUpOpen(true);
     }

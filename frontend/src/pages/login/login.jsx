@@ -10,7 +10,7 @@ import axios from "../../axios"
 import {useNavigate} from "react-router-dom"
 
 
-const Login = () => {
+const Login = (props) => {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -36,12 +36,20 @@ const Login = () => {
         e.preventDefault();
         try{
             setLoading(true);
-            const response = await axios.post("/auth/supplier-login", {
-                email,
-                password
-            })
-            console.log(response);
-            navigate(`/dashboard/${response.data.user._id}/${response.data.user.name}`);
+            if(props.welcomeText){
+                const response = await axios.post("/auth/supplier-login", {
+                    email,
+                    password
+                })
+                navigate(`/dashboard/supplier/${response.data.user._id}/${response.data.user.name}`);
+            }
+            else{
+                const response = await axios.post("/auth/customer-login", {
+                    email,
+                    password
+                })
+                navigate(`/dashboard/customer/${response.data.user._id}/${response.data.user.name}`);
+            }
         }catch(error){
             console.log(error);
             setLoading(false);
@@ -60,7 +68,7 @@ const Login = () => {
             {isBackgroundBlurred && <div style={blurredBackgroundStyles} />}
                 {loading && <Loader />}
             <div className="login-background">
-                <h2>Welcome Back, Supplier!</h2>
+                <h2>Howdy, Welcome Back {props.welcomeText}</h2>
                 <form onSubmit={handleSubmit}>
                 <div className="input-container">
                     <i className="fas fa-user"></i>
@@ -84,7 +92,7 @@ const Login = () => {
                 </div>
                 <button type="submit" className="login-button">Login</button>
                 </form>
-                <p>Not a member? <a href="/signup">Register Here</a></p>
+                <p>Not a member? <a href={props.welcomeText? "/supplier/signup" : "/signup"}>Register Here</a></p>
             </div>
             <PopUp
                 isOpen={isPopUpOpen}

@@ -38,6 +38,14 @@ const productSchema = new mongoose.Schema({
         ref: 'supplier',
         required: true,
     },
+    expiry:{
+        type:Number,
+        default:null
+    },
+    warranty:{
+        type:Number,
+        default:null
+    },
     products:[
         {
             randomNumber: {
@@ -54,7 +62,21 @@ const productSchema = new mongoose.Schema({
             },
             purchaseDate:{
                 type: Date,
-            }
+            },
+            expiryDate:{
+                type:Date
+            },
+            warrantyDate:{
+                type:Date
+            },
+            expiryNotification:{
+                type:Boolean,
+                default:false
+            },
+            warrantyNotification:{
+                type:Boolean,
+                default:false
+            },
         }
     ]
 }, {timestamps: true})

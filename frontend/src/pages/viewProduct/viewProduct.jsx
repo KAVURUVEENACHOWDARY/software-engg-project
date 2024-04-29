@@ -78,6 +78,8 @@ const ViewProducts = ({ userId, userType, setCartNumber, setCart, cart}) => {
     }
 
     useEffect(() => {
+        setCartNumber(0);
+        setCart([]);
         fetchproducts();
     }, []);
 

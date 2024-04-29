@@ -7,8 +7,6 @@ import { Container, Row, Col, Card, Navbar, Nav, Image } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
-import authenticImage from "../../images/authentic.png";
-import "./verifyProduct.css"
 
 export default function VerifyProduct() {
     const navigate = useNavigate();
@@ -82,6 +80,7 @@ export default function VerifyProduct() {
                             {userType === "customer" && <Nav className="me-auto">
                                 <Nav.Item className='nav-item' onClick={() => navigate(`/scan/${customerId}`)}>Verify Product</Nav.Item>
                                 <Nav.Item className='nav-item' onClick={() => navigate(`/dashboard/${userType}/${customerId}/${userName}`)}>View Products</Nav.Item>
+                                <Nav.Item className='nav-item' onClick={() => navigate(`/view-coupons/${customerId}/${userName}/${userType}`)}>View Rewards</Nav.Item>
                             </Nav>}
                             <Navbar.Text className='nav-text'>
                                 Signed in as: {userName}

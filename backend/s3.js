@@ -1,7 +1,6 @@
 const AWS = require('aws-sdk');
 const S3 = require("aws-sdk/clients/s3");
 const fs = require("fs");
-const { url } = require('inspector');
 
 //configuring the s3 object
 //to get the access of the respective bucket

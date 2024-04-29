@@ -10,7 +10,10 @@ const storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         if(file.fieldname === "prodImage"){
-            cb(null,req.params.id + '-' + file.fieldname + '.png');
+            cb(null, Math.floor(Math.random() * 100000000) + '-' + file.fieldname + '.png');
+        }
+        if(file.fieldname === "couponImage"){
+            cb(null, Math.floor(Math.random() * 100000000) + '-' + file.fieldname + '.png');
         }
     }
 })
@@ -23,6 +26,12 @@ const prodUpload = upload.fields([
     
 ])
 
+const couponUpload = upload.fields([
+    { name: 'couponImage', maxCount: 1 }, 
+    
+])
+
 module.exports = {
-    prodUpload
+    prodUpload,
+    couponUpload
 };
