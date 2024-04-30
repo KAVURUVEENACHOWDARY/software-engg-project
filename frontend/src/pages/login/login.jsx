@@ -68,7 +68,7 @@ const Login = (props) => {
             {isBackgroundBlurred && <div style={blurredBackgroundStyles} />}
                 {loading && <Loader />}
             <div className="login-background">
-                <h2>Howdy, Welcome!! {props.welcomeText}</h2>
+                <h2>Howdy!! Login {props.welcomeText}</h2>
                 <form onSubmit={handleSubmit}>
                 <div className="input-container">
                     <i className="fas fa-user"></i>
