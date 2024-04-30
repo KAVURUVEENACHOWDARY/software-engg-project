@@ -6,7 +6,6 @@ import axios from "../../axios"
 import { useParams } from "react-router-dom"
 
 export default function ViewCoupons() {
-
     const { userId } = useParams();
 
     const [isPopUpOpen, setIsPopUpOpen] = useState(false);
