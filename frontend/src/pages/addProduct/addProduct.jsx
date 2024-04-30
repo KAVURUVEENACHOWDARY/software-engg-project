@@ -9,8 +9,6 @@ import { useParams } from "react-router-dom"
 import { Form, Button, Col, Row, Container } from 'react-bootstrap';
 
 const AddProductForm = () => {
-
-
     const { userId } = useParams();
     const [name, setName] = useState();
     const [price, setPrice] = useState();
